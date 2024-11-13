@@ -4,15 +4,15 @@ import pandas as pd
 from flask import Flask, jsonify, request
 
 DATABASE = "base1.db"
-CSV_FILE = "https://raw.githubusercontent.com/Paulita11111/TPinf/main/Updated_Clothing_Products.csv"
+CSV_FILE = "Updated_Clothing_Products.csv"  # Usando el archivo descargado
 
 # Función para crear la tabla en la base de datos
 def crear_tabla():
     with sqlite3.connect(DATABASE) as conn:
         c = conn.cursor()
-        c.execute('DROP TABLE IF EXISTS bigbasket')
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS bigbasket (
+        c.execute('DROP TABLE IF EXISTS product_catalog')
+        c.execute(''' 
+            CREATE TABLE IF NOT EXISTS product_catalog (
                 "index" INTEGER,
                 product TEXT,
                 category TEXT,
@@ -36,8 +36,8 @@ def importar_productos():
         with sqlite3.connect(DATABASE) as conn:
             c = conn.cursor()
             for _, row in df.iterrows():
-                c.execute('''
-                    INSERT INTO bigbasket (
+                c.execute(''' 
+                    INSERT INTO product_catalog (
                         "index", product, category, sub_category, brand, sale_price, 
                         market_price, type, rating, description
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -54,14 +54,14 @@ def importar_productos():
 def get_products():
     with sqlite3.connect(DATABASE) as conn:
         conn.row_factory = sqlite3.Row
-        products = conn.execute("SELECT * FROM bigbasket").fetchall()
+        products = conn.execute("SELECT * FROM product_catalog").fetchall()
         return products
 
 # Función para obtener un producto por su ID
 def get_product(id):
     with sqlite3.connect(DATABASE) as conn:
         conn.row_factory = sqlite3.Row
-        product = conn.execute("SELECT rowid, * FROM bigbasket WHERE rowid = ?", (id,)).fetchone()
+        product = conn.execute("SELECT rowid, * FROM product_catalog WHERE rowid = ?", (id,)).fetchone()
         if product is None:
             return {"message": "Product not found"}, 404
         return dict(product)
@@ -70,8 +70,8 @@ def get_product(id):
 def add_product():
     new_product = request.get_json()
     with sqlite3.connect(DATABASE) as conn:
-        conn.execute('''
-            INSERT INTO bigbasket (
+        conn.execute(''' 
+            INSERT INTO product_catalog (
                 "index", product, category, sub_category, brand, sale_price, 
                 market_price, type, rating, description
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -87,8 +87,8 @@ def add_product():
 def update_product(id):
     product_details = request.get_json()
     with sqlite3.connect(DATABASE) as conn:
-        conn.execute('''
-            UPDATE bigbasket SET 
+        conn.execute(''' 
+            UPDATE product_catalog SET 
                 "index" = ?, product = ?, category = ?, sub_category = ?, brand = ?, 
                 sale_price = ?, market_price = ?, type = ?, rating = ?, description = ?
             WHERE rowid = ?
@@ -103,7 +103,7 @@ def update_product(id):
 # Función para eliminar un producto
 def delete_product(id):
     with sqlite3.connect(DATABASE) as conn:
-        conn.execute("DELETE FROM bigbasket WHERE rowid = ?", (id,))
+        conn.execute("DELETE FROM product_catalog WHERE rowid = ?", (id,))
         conn.commit()
 
 # Función para obtener el valor del dólar en euros
@@ -134,7 +134,5 @@ def iniciar():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     iniciar()
-    
-
