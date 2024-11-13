@@ -112,3 +112,4 @@ if __name__ == "__main__":
     db_nuevo1.crear_tabla()
     db_nuevo1.importar_productos()
     db_nuevo1.obtener_valores_dolar()
+    
